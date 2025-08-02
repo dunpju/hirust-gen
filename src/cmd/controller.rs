@@ -8,7 +8,7 @@ use crate::cmd::file;
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
     Command::new("controller")
-        .short_flag('E')
+        .short_flag('c')
         .long_flag("controller")
         .about("controller.")
         .arg(Arg::new("out")
@@ -19,21 +19,15 @@ pub(crate) fn command() -> Command {
                  .help("Output Directory"),
         )
         .arg(Arg::new("name")
-                 .conflicts_with("file")
+                 .required(true)
                  .short('n')
                  .long("name")
                  .help("name"),
         )
-        .arg(Arg::new("file")
-                 .conflicts_with("name")
-                 .short('f')
-                 .long("file")
-                 .help("file"),
-        )
 }
 
 #[derive(Serialize)]
-struct EnumStub {
+struct ControllerStub {
     pub doc: String,
     pub rows: Vec<Enum>,
 }
@@ -44,32 +38,18 @@ struct Enum {
     pub code: i32,
     pub message: String,
 }
+
 #[allow(dead_code)]
 pub(crate) fn execute(arg_matches: &ArgMatches) {
     let out_file = crate::cmd::r#gen::out_file(arg_matches);
     let import_mod_file = out_file.clone() + "/mod.rs";
 
-    let file = crate::cmd::r#gen::file(arg_matches);
-    if !file.is_empty() {
-        let content = fs::read_to_string(file.clone().as_str()).expect(format!("读取{}文件失败", import_mod_file.clone()).as_str());
-        for line in content.lines() {
-            let pattern = format!("--name={}-e=(.*)+-f=(.*){}", '"', '"');
-            let re = Regex::new(pattern.as_str()).unwrap();
-            match re.captures(line) {
-                Some(c) => {
-                    let mut name: String = c.get(0).map_or("", |m| m.as_str()).parse().unwrap();
-                    name = name.replace("--name=\"", "");
-                    name = name.replace("\"", "");
-                    single(out_file.clone(), import_mod_file.clone(), name.clone())
-                }
-                None => {}
-            }
-        }
-    } else {
-        let name: String = crate::cmd::r#gen::name(arg_matches);
+    let name: String = crate::cmd::r#gen::name(arg_matches);
+    println!("{}", file!());
+    println!("{}", import_mod_file);
+    println!("{}", name);
 
-        single(out_file.clone(), import_mod_file.clone(), name)
-    }
+    //single(out_file.clone(), import_mod_file.clone(), name)
 }
 
 fn single(mut out_file: String, import_mod_file: String, mut name: String) {
@@ -102,7 +82,7 @@ fn single(mut out_file: String, import_mod_file: String, mut name: String) {
         rows.push(Enum { name: name.to_uppercase(), code, message });
     }
 
-    let stub = EnumStub {
+    let stub = ControllerStub {
         doc,
         rows,
     };
