@@ -13,3 +13,6 @@ regex = "1.11.1"
 minijinja = "2.7.0"
 walkdir = "2.5.0"
 serde_yml = "0.0.12"
+syn = {version ="2.0.104", features = ["full", "parsing"] }
+proc-macro2 = "1.0.95"
+quote = "1.0.40"

@@ -72,3 +72,12 @@ pub(crate) fn file(arg_matches: &ArgMatches) -> String {
     }
     file
 }
+
+#[allow(dead_code)]
+pub(crate) fn tag(arg_matches: &ArgMatches) -> String {
+    let mut tag = String::new();
+    if let Some(out) = arg_matches.get_many::<String>("tag") {
+        tag = out.map(|s| s.as_str()).collect::<Vec<_>>().join("");
+    }
+    tag
+}
