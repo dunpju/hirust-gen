@@ -1,0 +1,25 @@
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+use std::sync::RwLock;
+use resp::ErrorCode;
+
+lazy_static! {
+   pub static ref ERROR_CODE_COLLECT: RwLock<HashMap<i64, ErrorCode>> = RwLock::new(HashMap::new());
+}
+
+#[allow(dead_code)]
+pub fn get(code: i64) -> Option<ErrorCode> {
+    Some(ErrorCode { code, message: ERROR_CODE_COLLECT.read().unwrap().get(&code)?.message() })
+}
+
+{%- for row in rows %}
+#[allow(dead_code)]
+pub const {{ row.name }}: ErrorCode = ErrorCode { code: {{ row.code }}, message:"{{ row.message }}" };
+{%- endfor %}
+
+#[allow(dead_code)]
+pub fn init() {
+    {%- for row in rows %}
+    ERROR_CODE_COLLECT.write().unwrap().insert({{ row.name }}.code, {{ row.name }});
+    {%- endfor %}
+}

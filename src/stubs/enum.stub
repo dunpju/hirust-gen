@@ -1,0 +1,17 @@
+use crate::enums::enum_body::Enum;
+
+// {{ doc }}
+
+{%- for row in rows %}
+#[allow(dead_code)]
+pub const {{ row.name }}: Enum = Enum::Body { code: {{ row.code }}, message: "{{ row.message }}" };
+{%- endfor %}
+
+#[allow(dead_code)]
+pub fn iter() ->Vec<Enum> {
+    vec![
+    {%- for row in rows %}
+        {{ row.name }},
+    {%- endfor %}
+    ]
+}

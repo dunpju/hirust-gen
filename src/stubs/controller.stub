@@ -1,0 +1,44 @@
+use crate::app::dto;
+use actix_web::{HttpRequest, Responder, web};
+use himacros::{delete, get, head, post, put, scope};
+use hirust_resp::*;
+
+//#[path = "../middlewares/mod.rs"]
+//mod middlewares;
+
+#[scope(file = "./src/app/controllers/test.rs")]
+#[allow(dead_code)]
+pub fn routes(cfg: &mut web::ServiceConfig) {
+    let scope = web::scope("/test"); // 定义路由组
+    cfg.service(scope);
+}
+
+// middleware = {middlewares::auth::auth}
+// auth = false
+#[post(path = "/post", tag = "crate::app::controllers::test::post", desc = "post")]
+async fn post(
+    req: actix_web::HttpRequest,
+    _body: web::Json<dto::login::DoLogin>,
+) -> impl Responder {
+    success_respond_to(&req, Some(String::from("Hey post!")))
+}
+
+#[get(path = "/get", tag = "crate::app::controllers::test::get", desc = "get")]
+async fn get(req: HttpRequest, _body: web::Json<dto::login::DoLogin>) -> impl Responder {
+    success_respond_to(&req, Some(String::from("Hey get!")))
+}
+
+#[put(path = "/put", tag = "crate::app::controllers::test::put", desc = "put")]
+async fn put(req: HttpRequest, _body: web::Json<dto::login::DoLogin>) -> impl Responder {
+    success_respond_to(&req, Some(String::from("Hey put!")))
+}
+
+#[delete(path = "/delete", tag = "crate::app::controllers::test::delete", desc = "delete")]
+async fn delete(req: HttpRequest, _body: web::Json<dto::login::DoLogin>) -> impl Responder {
+    success_respond_to(&req, Some(String::from("Hey delete!")))
+}
+
+#[head(path = "/head", tag = "crate::app::controllers::test::head", desc = "head")]
+async fn head(req: HttpRequest, _body: web::Json<dto::login::DoLogin>) -> impl Responder {
+    success_respond_to(&req, Some(String::from("Hey head!")))
+}

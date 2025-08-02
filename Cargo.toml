@@ -1,0 +1,15 @@
+[package]
+name = "hirust-gen"
+authors = ["dengpju"]
+version = "0.1.0"
+edition = "2024"
+description = "A Rust gen"
+license = "MIT"
+
+[dependencies]
+clap = "4.5.42"
+serde = { version = "1.0.219", features = ["derive"] }
+regex = "1.11.1"
+minijinja = "2.7.0"
+walkdir = "2.5.0"
+serde_yml = "0.0.12"
