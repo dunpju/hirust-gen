@@ -1,9 +1,9 @@
+use crate::cmd::file;
 use clap::{Arg, ArgAction, ArgMatches, Command};
-use std::fs;
 use minijinja::Environment;
 use regex::Regex;
 use serde::Serialize;
-use crate::cmd::file;
+use std::{fs, path::Path};
 
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
@@ -11,24 +11,27 @@ pub(crate) fn command() -> Command {
         .short_flag('E')
         .long_flag("enum")
         .about("enum.")
-        .arg(Arg::new("out")
-                 .required(true)
-                 .short('o')
-                 .long("out")
-                 .action(ArgAction::Set)
-                 .help("Output Directory"),
+        .arg(
+            Arg::new("out")
+                .required(true)
+                .short('o')
+                .long("out")
+                .action(ArgAction::Set)
+                .help("Output Directory"),
         )
-        .arg(Arg::new("name")
-                 .conflicts_with("file")
-                 .short('n')
-                 .long("name")
-                 .help("name"),
+        .arg(
+            Arg::new("name")
+                .conflicts_with("file")
+                .short('n')
+                .long("name")
+                .help("name"),
         )
-        .arg(Arg::new("file")
-                 .conflicts_with("name")
-                 .short('f')
-                 .long("file")
-                 .help("file"),
+        .arg(
+            Arg::new("file")
+                .conflicts_with("name")
+                .short('f')
+                .long("file")
+                .help("file"),
         )
 }
 
@@ -51,7 +54,8 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
 
     let file = crate::cmd::r#gen::file(arg_matches);
     if !file.is_empty() {
-        let content = fs::read_to_string(file.clone().as_str()).expect(format!("读取{}文件失败", import_mod_file.clone()).as_str());
+        let content = fs::read_to_string(file.clone().as_str())
+            .expect(format!("读取{}文件失败", import_mod_file.clone()).as_str());
         for line in content.lines() {
             let pattern = format!("--name={}-e=(.*)+-f=(.*){}", '"', '"');
             let re = Regex::new(pattern.as_str()).unwrap();
@@ -99,15 +103,20 @@ fn single(mut out_file: String, import_mod_file: String, mut name: String) {
         let name: String = em[0].trim().to_string();
         let code: i32 = em[1].trim().parse().unwrap();
         let message: String = em[2].replace("\n", "").replace("\r", "").trim().to_string();
-        rows.push(Enum { name: name.to_uppercase(), code, message });
+        rows.push(Enum {
+            name: name.to_uppercase(),
+            code,
+            message,
+        });
     }
 
-    let stub = EnumStub {
-        doc,
-        rows,
-    };
+    let stub = EnumStub { doc, rows };
 
-    let stub_template = fs::read_to_string("./resources/stubs/enum.stub").unwrap();
+    let binding = file!();
+    let path = Path::new(&binding);
+    let stub_path = format!("{}", path.parent().unwrap().display());
+
+    let stub_template = fs::read_to_string(stub_path + "/../stubs/enum.stub").unwrap();
 
     let mut env = Environment::new();
     env.add_template("stub", stub_template.as_str()).unwrap();
@@ -117,12 +126,15 @@ fn single(mut out_file: String, import_mod_file: String, mut name: String) {
 
     out_file = out_file + "/" + crate_dir.clone().as_str();
 
-    let out_file_dir_list: Vec<String> = out_file.clone().split("/").map(|x| x.to_string()).collect();
+    let out_file_dir_list: Vec<String> =
+        out_file.clone().split("/").map(|x| x.to_string()).collect();
     let mut out_file_dir_temp = String::new();
     for out_file_dir in out_file_dir_list {
-        out_file_dir_temp = String::from(out_file_dir_temp.to_owned() + out_file_dir.as_str() + "/");
+        out_file_dir_temp =
+            String::from(out_file_dir_temp.to_owned() + out_file_dir.as_str() + "/");
         if !std::path::Path::new(out_file_dir_temp.clone().as_str()).exists() {
-            fs::create_dir(out_file.as_str()).expect(format!("创建{}目录失败", out_file_dir_temp.clone()).as_str());
+            fs::create_dir(out_file.as_str())
+                .expect(format!("创建{}目录失败", out_file_dir_temp.clone()).as_str());
         }
     }
 
@@ -139,9 +151,18 @@ fn single(mut out_file: String, import_mod_file: String, mut name: String) {
     if !std::path::Path::new(import_mod_file.clone().as_str()).exists() {
         file::create_file(import_mod_file.clone().as_str());
     }
-    let content = fs::read_to_string(import_mod_file.clone().as_str()).expect(format!("读取{}文件失败", import_mod_file.clone()).as_str());
+    let content = fs::read_to_string(import_mod_file.clone().as_str())
+        .expect(format!("读取{}文件失败", import_mod_file.clone()).as_str());
     if !content.contains(format!("pub mod {};", crate_dir.clone()).as_str()) {
         // 写文件
-        file::write_file(import_mod_file.as_str(), format!("{}\n{}", content, format!("pub mod {};", crate_dir.clone()).as_str()).as_str());
+        file::write_file(
+            import_mod_file.as_str(),
+            format!(
+                "{}\n{}",
+                content,
+                format!("pub mod {};", crate_dir.clone()).as_str()
+            )
+            .as_str(),
+        );
     }
 }

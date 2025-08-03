@@ -47,23 +47,14 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
 
     let tag: String = crate::cmd::r#gen::tag(arg_matches);
 
-    println!("{}", file!());
-    println!("{}", import_mod_file);
-    println!("{}", name);
-    println!("{}", source_file);
+    let mut tag_prefix = tag.clone();
 
-    let mut tag_prefix = String::new();
-
-    if tag.is_empty() {
+    if tag_prefix.is_empty() {
         let binding = out_file.clone();
         let binding = binding.as_str();
         let path = Path::new(&binding);
         tag_prefix = format!("{}", path.file_name().unwrap().display());
-    } else {
-        tag_prefix = tag;
     }
-
-    let tag_prefix = tag_prefix.clone();
 
     let stub = ControllerStub {
         source_file: source_file.clone(),
@@ -113,15 +104,16 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
     let mut new_mod_content = String::new();
     let mut is_new_mod_ok = false;
 
+    let line_break = String::from("\n");
+
     // 解析文件内容为 AST
     let syntax: File = parse_file(&content).expect("Not valid Rust code");
     for item in syntax.items {
-        let item_str = quote! {#item}.to_string();
-        println!("item：{}", item_str);
         if let Item::Mod(ItemMod { .. }) = item {
             if !is_new_mod_ok {
                 let item_str = format!("pub mod {};", name.clone());
                 new_mod_content.push_str(item_str.as_str());
+                new_mod_content.push_str(line_break.clone().as_str());
                 let item_str = quote! {#item}.to_string();
                 new_mod_content.push_str(item_str.as_str());
                 is_new_mod_ok = true;
@@ -140,13 +132,11 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
             // 寻找configure函数
             if fn_name.eq("configure") {
                 // 函数tokens
-                let fn_sig_str = quote! {#sig}.to_string();
-                println!("函数签名：{}", fn_sig_str);
+                //let fn_sig_str = quote! {#sig}.to_string();
                 // 提取函数参数
                 let args_map = parse_extract_args(quote! {#sig});
                 // 参数名
                 let arg_name = args_map.values().next().unwrap();
-                println!("函数参数名：{}", arg_name);
 
                 // 抽取函数体语句
                 let statements = block.stmts.clone();
@@ -163,7 +153,7 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
                         // 将字符串转换成Stmt
                         let stmt = parse_str::<Stmt>(
                             format!(
-                                "let {} = {}.configure({}::routes);",
+                                "let {} = {}.configure({}::routes);\n",
                                 arg_name.clone(),
                                 arg_name.clone(),
                                 name.clone()
@@ -197,12 +187,14 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
             let item_str = quote! {#item}.to_string();
             new_mod_content.push_str(item_str.as_str());
         }
+        new_mod_content.push_str(line_break.clone().as_str());
     }
 
-    let syntax: File = parse_file(&new_mod_content).expect("Not valid Rust code");
-    println!("new_syntax_content：{}", quote! {#syntax}.to_string());
+    //let syntax: File = parse_file(&new_mod_content).expect("Not valid Rust code");
+    //println!("new_syntax_content：{}", quote! {#syntax}.to_string());
     // 写文件
-    file::write_file(import_mod_file.clone().as_str(), quote! {#syntax}.to_string().as_str());
+    //file::write_file(import_mod_file.clone().as_str(), quote! {#syntax}.to_string().as_str());
+    file::write_file(import_mod_file.clone().as_str(), &new_mod_content.as_str());
 }
 
 #[allow(unused)]
