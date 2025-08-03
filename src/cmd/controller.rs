@@ -1,11 +1,11 @@
 use crate::cmd::file;
 use clap::{Arg, ArgAction, ArgMatches, Command};
 use minijinja::Environment;
-use quote::quote;
+use quote::{quote};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::{fs, path::Path};
-use syn::{File, Item, ItemFn, ItemMod, Stmt, parse_file, parse_str};
+use syn::{parse_file, parse_str, File, Item, ItemFn, ItemMod, Stmt};
 
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
@@ -53,7 +53,7 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
         let binding = out_file.clone();
         let binding = binding.as_str();
         let path = Path::new(&binding);
-        tag_prefix = format!("{}", path.file_name().unwrap().display());
+        tag_prefix = format!("{}::{}", path.file_name().unwrap().display(), name);
     }
 
     let stub = ControllerStub {
@@ -153,7 +153,7 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
                         // 将字符串转换成Stmt
                         let stmt = parse_str::<Stmt>(
                             format!(
-                                "let {} = {}.configure({}::routes);\n",
+                                "let {} = {}.configure({}::routes);",
                                 arg_name.clone(),
                                 arg_name.clone(),
                                 name.clone()
@@ -168,15 +168,16 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
                 }
 
                 // 使用解析输入重构函数，然后输出
-                let new_configure_fn_str = quote!(
+                let new_configure_fn_str = quote! {
                     // 在该函数上重复其他所有属性（保持不变）
                     #(#attrs)*
                     // 重构函数声明
                     #vis #sig {
                         #(#new_statements)*
                     }
-                )
+                }
                 .to_string();
+                println!("{}", &new_configure_fn_str);
                 new_mod_content.push_str(new_configure_fn_str.as_str());
             } else {
                 // 其他函数
@@ -191,7 +192,7 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
     }
 
     //let syntax: File = parse_file(&new_mod_content).expect("Not valid Rust code");
-    //println!("new_syntax_content：{}", quote! {#syntax}.to_string());
+    //eprintln!("new_syntax_content：{:#?}", quote! {#syntax}.to_string());
     // 写文件
     //file::write_file(import_mod_file.clone().as_str(), quote! {#syntax}.to_string().as_str());
     file::write_file(import_mod_file.clone().as_str(), &new_mod_content.as_str());
