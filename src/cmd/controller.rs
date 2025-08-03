@@ -1,11 +1,11 @@
 use crate::cmd::file;
 use clap::{Arg, ArgAction, ArgMatches, Command};
 use minijinja::Environment;
-use quote::{quote};
+use quote::quote;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::{fs, path::Path};
-use syn::{parse_file, parse_str, File, Item, ItemFn, ItemMod, Stmt};
+use syn::{File, Item, ItemFn, ItemMod, Stmt, parse_file, parse_str};
 
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
@@ -195,6 +195,35 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
     // 写文件
     //file::write_file(import_mod_file.clone().as_str(), quote! {#syntax}.to_string().as_str());
     file::write_file(import_mod_file.clone().as_str(), &new_mod_content.as_str());
+
+    // rustfmt格式化文件
+    let output = std::process::Command::new("rustfmt")
+        .args([import_mod_file.clone().as_str(), "--edition", "2024"])
+        .output() // 执行命令并等待它结束
+        .expect("Failed to execute process");
+    if output.status.success() {
+        // 输出标准输出
+        if let Ok(stdout) = String::from_utf8(output.stdout) {
+            println!("stdout: {}", stdout);
+        } else {
+            eprintln!("Failed to convert stdout to UTF-8");
+        }
+
+        // 输出标准错误
+        if let Ok(stderr) = String::from_utf8(output.stderr) {
+            println!("stderr: {}", stderr);
+        } else {
+            eprintln!("Failed to convert stderr to UTF-8");
+        }
+    } else {
+        eprintln!("Process did not run successfully");
+        // 输出标准错误
+        if let Ok(stderr) = String::from_utf8(output.stderr) {
+            println!("stderr: {}", stderr);
+        } else {
+            eprintln!("Failed to convert stderr to UTF-8");
+        }
+    }
 }
 
 #[allow(unused)]
