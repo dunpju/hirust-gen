@@ -177,7 +177,6 @@ pub(crate) fn execute(arg_matches: &ArgMatches) {
                     }
                 }
                 .to_string();
-                println!("{}", &new_configure_fn_str);
                 new_mod_content.push_str(new_configure_fn_str.as_str());
             } else {
                 // 其他函数
