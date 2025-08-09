@@ -1,11 +1,8 @@
-use lazy_static::lazy_static;
+use hirust_resp::ErrorCode;
 use std::collections::HashMap;
-use std::sync::RwLock;
-use resp::ErrorCode;
+use std::sync::{LazyLock, RwLock};
 
-lazy_static! {
-   pub static ref ERROR_CODE_COLLECT: RwLock<HashMap<i64, ErrorCode>> = RwLock::new(HashMap::new());
-}
+static ERROR_CODE_COLLECT: LazyLock<RwLock<HashMap<i64, ErrorCode>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 #[allow(dead_code)]
 pub fn get(code: i64) -> Option<ErrorCode> {
