@@ -1,5 +1,6 @@
 use actix_web::{HttpRequest, Responder, web};
 use himacros::{delete, get, head, post, put, scope};
+use hirust_auth::Auth;
 use hirust_resp::*;
 
 //#[path = "../middlewares/mod.rs"]
