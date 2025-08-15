@@ -7,6 +7,8 @@ use std::collections::HashMap;
 use std::{fs, path::Path};
 use syn::{File, Item, ItemFn, ItemMod, Stmt, parse_file, parse_str};
 
+// cargo run gen controller --out="./src/app/controllers" --name="test"
+// cargo run gen controller --out="./src/app/controllers" --name="test" --tag="app::controllers::test"
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
     Command::new("controller")
