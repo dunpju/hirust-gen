@@ -1,6 +1,18 @@
 use crate::cmd::{code, controller, r#enum};
 use clap::{ArgMatches, Command};
 
+///
+/// Build tools
+///
+/// Examples
+///```text
+/// cargo run gen code --out="./errcode/mod.rs" --source="./yaml"
+/// cargo run gen enum --out="./enums" --name="-e=order_flow -f=发起订单:selling_assistant-1-销售内勤,sale-2-销售"
+/// cargo run gen enum --out="./enums" --file="./src/cmd/enum.md"
+/// cargo run gen controller --out="./src/app/controllers" --name="test"
+/// cargo run gen controller --out="./src/app/controllers" --name="test" --tag="app::controllers::test"
+///```
+///
 #[allow(dead_code)]
 pub fn command() -> ArgMatches {
     let matches = Command::new("pacman")

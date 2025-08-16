@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use std::{fs, path::Path};
 use walkdir::WalkDir;
 
+// cargo run gen code --out="./errcode/mod.rs" --source="./yaml"
 #[allow(dead_code)]
 pub(crate) fn command() -> Command {
     Command::new("code")
