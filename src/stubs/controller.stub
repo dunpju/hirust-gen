@@ -19,29 +19,29 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
 #[post(path = "/post", desc = "post")]
 #[allow(dead_code)]
 async fn post(req: actix_web::HttpRequest) -> Result<impl Responder, Error> {
-    Ok(success_respond_to(&req, Some(String::from("Hey post!")))）
+    Ok(success_respond_to(&req, Some(String::from("Hey post!"))))
 }
 
 #[get(path = "/get", desc = "get")]
 #[allow(dead_code)]
 async fn get(req: HttpRequest) -> Result<impl Responder, Error> {
-    Ok(success_respond_to(&req, Some(String::from("Hey get!")))）
+    Ok(success_respond_to(&req, Some(String::from("Hey get!"))))
 }
 
 #[put(path = "/put", desc = "put")]
 #[allow(dead_code)]
 async fn put(req: HttpRequest) -> Result<impl Responder, Error> {
-    Ok(success_respond_to(&req, Some(String::from("Hey put!")))）
+    Ok(success_respond_to(&req, Some(String::from("Hey put!"))))
 }
 
 #[delete(path = "/delete", desc = "delete")]
 #[allow(dead_code)]
 async fn delete(req: HttpRequest) -> Result<impl Responder, Error> {
-    Ok(success_respond_to(&req, Some(String::from("Hey delete!")))）
+    Ok(success_respond_to(&req, Some(String::from("Hey delete!"))))
 }
 
 #[head(path = "/head", desc = "head")]
 #[allow(dead_code)]
 async fn head(req: HttpRequest) -> Result<impl Responder, Error> {
-    Ok(success_respond_to(&req, Some(String::from("Hey head!")))）
+    Ok(success_respond_to(&req, Some(String::from("Hey head!"))))
 }
